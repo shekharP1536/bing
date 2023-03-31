@@ -1,0 +1,190 @@
+<html>
+<head>
+  <style>
+    h1 {
+      text-align: center;
+    }
+
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    li {
+      margin: 10px;
+      padding: 10px;
+      border: 1px solid black;
+      display: flex;
+      align-items: center;
+    }
+
+    li.done {
+      color: gray;
+      text-decoration: line-through;
+    }
+
+    li.important {
+      background-color: yellow;
+    }
+
+    input[type="text"] {
+      width: 80%;
+    }
+
+    button {
+      width: 10%;
+    }
+
+    i {
+      margin-left: auto;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<head>
+  <!-- Other tags -->
+  <!-- Add this link to use Font Awesome icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+  <h1>Todo List</h1>
+  <div class="container">
+    <input type="text" id="todo" placeholder="Enter a new task">
+    <button id="add">Add</button>
+    <ul id="list"></ul>
+  </div>
+  <script>
+    // Get elements from the document
+    const todoInput = document.getElementById("todo");
+    const addButton = document.getElementById("add");
+    const list = document.getElementById("list");
+
+    // Initialize an empty array to store the tasks
+    let todos = [];
+
+    // Load the tasks from the local storage when the page loads
+    window.onload = function() {
+      // Get the tasks from the local storage as a string
+      const savedTasks = localStorage.getItem("tasks");
+      // If there are any tasks, parse them as an array and assign them to todos
+      if (savedTasks) {
+        todos = JSON.parse(savedTasks);
+      }
+      // Render the tasks on the list
+      renderTodos();
+    };
+
+    // Add a click event listener to the add button
+    addButton.addEventListener("click", function() {
+      // Get the value of the todo input
+      const todo = todoInput.value;
+      // If the input is not empty, create a new task object with the input value and a false isCompleted property
+      if (todo) {
+        const newTask = {
+          item: todo,
+          isCompleted: false,
+          isImportant: false
+        };
+        // Push the new task to the todos array
+        todos.push(newTask);
+        // Save the todos array to the local storage as a string
+        localStorage.setItem("tasks", JSON.stringify(todos));
+        // Render the tasks on the list
+        renderTodos();
+        // Clear the input value
+        todoInput.value = "";
+      } else {
+        // If the input is empty, alert the user to enter something
+        alert("Please enter something to do!");
+      }
+    });
+
+    // Define a function to render the tasks on the list
+    function renderTodos() {
+      // Clear the list content
+      list.innerHTML = "";
+      // Loop through the todos array
+      for (let i = 0; i < todos.length; i++) {
+        // Get the current task object
+        const task = todos[i];
+        // Create a new li element
+        const li = document.createElement("li");
+        // Set the innerHTML of the li element to the task item
+        li.innerHTML = task.item;
+        // If the task is completed, add a done class to the li element
+        if (task.isCompleted) {
+          li.classList.add("done");
+        }
+        // If the task is important, add an important class to the li element
+        if (task.isImportant) {
+          li.classList.add("important");
+        }
+        // Create a new i element for the delete icon
+        const delIcon = document.createElement("i");
+        // Add some classes and attributes to the i element
+        delIcon.classList.add("fas", "fa-trash-alt");
+        delIcon.setAttribute("data-index", i);
+        delIcon.setAttribute("title", "Delete");
+        // Append the i element to the li element
+        li.appendChild(delIcon);
+        // Create a new i element for the important icon
+        const impIcon = document.createElement("i");
+        // Add some classes and attributes to the i element
+        impIcon.classList.add("fas", "fa-exclamation-circle");
+        impIcon.setAttribute("data-index", i);
+        impIcon.setAttribute("title", "Mark as important");
+          // Append the i element to the li element
+        li.appendChild(impIcon);
+        // Append the li element to the list
+        list.appendChild(li);
+      }
+    }
+
+    // Add a click event listener to the list
+    list.addEventListener("click", function(event) {
+      // Get the target element of the event
+      const target = event.target;
+      // Get the tag name of the target element
+      const tagName = target.tagName;
+      // If the target element is a li element, toggle its isCompleted property and class
+      if (tagName === "LI") {
+        // Get the index of the target element from its child i element
+        const index = target.querySelector("i").getAttribute("data-index");
+        // Get the task object from the todos array at that index
+        const task = todos[index];
+        // Toggle the isCompleted property of the task object
+        task.isCompleted = !task.isCompleted;
+        // Save the todos array to the local storage as a string
+        localStorage.setItem("tasks", JSON.stringify(todos));
+        // Render the tasks on the list
+        renderTodos();
+      }
+      // If the target element is an i element with a delete icon, delete its parent li element and task object
+      if (tagName === "I" && target.classList.contains("fa-trash-alt")) {
+        // Get the index of the target element from its data-index attribute
+        const index = target.getAttribute("data-index");
+        // Remove the task object from the todos array at that index
+        todos.splice(index, 1);
+        // Save the todos array to the local storage as a string
+        localStorage.setItem("tasks", JSON.stringify(todos));
+        // Render the tasks on the list
+        renderTodos();
+      }
+      // If the target element is an i element with an important icon, toggle its parent li element and task object's isImportant property and class
+      if (tagName === "I" && target.classList.contains("fa-exclamation-circle")) {
+        // Get the index of the target element from its data-index attribute
+        const index = target.getAttribute("data-index");
+        // Get the task object from the todos array at that index
+        const task = todos[index];
+        // Toggle the isImportant property of the task object
+        task.isImportant = !task.isImportant;
+        // Save the todos array to the local storage as a string
+        localStorage.setItem("tasks", JSON.stringify(todos));
+        // Render the tasks on the list
+        renderTodos();
+      }
+    });
+  </script>
+</body>
+</html>
